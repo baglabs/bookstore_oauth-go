@@ -67,7 +67,7 @@ func GetClientId(request *http.Request) int64 {
 	return clientId
 }
 
-func AuthenticateRequest(request *http.Request) *rest_errors.RestErr {
+func AuthenticateRequest(request *http.Request) rest_errors.RestErr {
 	if request == nil {
 		return nil
 	}
@@ -81,7 +81,7 @@ func AuthenticateRequest(request *http.Request) *rest_errors.RestErr {
 
 	at, err := getAccessToken(accessTokenId)
 	if err != nil {
-		if err.Status == http.StatusNotFound {
+		if err.Status() == http.StatusNotFound {
 			return nil
 		}
 		return err
@@ -102,7 +102,7 @@ func CleanRequest(request *http.Request) {
 	request.Header.Del(headerXCallerId)
 }
 
-func getAccessToken(accessTokenId string) (*accessToken, *rest_errors.RestErr) {
+func getAccessToken(accessTokenId string) (*accessToken, rest_errors.RestErr) {
 	response := oauthRestClient.Get(fmt.Sprintf("/oauth/access_token/%s", accessTokenId))
 	if response == nil || response.Response == nil {
 		return nil, rest_errors.NewInternalServerError("invalid restclient response when trying to get access token", errors.New("db error"))
@@ -114,7 +114,7 @@ func getAccessToken(accessTokenId string) (*accessToken, *rest_errors.RestErr) {
 			return nil, rest_errors.NewInternalServerError("invalid error interface when trying get access token", errors.New("db error"))
 		}
 
-		return nil, &restErr
+		return nil, restErr
 	}
 
 	var at accessToken
